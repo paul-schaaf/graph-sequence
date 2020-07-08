@@ -5,7 +5,21 @@
                 <div id="load-btn">Load</div>
                 <div id="save-btn">Save</div>
             </div>
-            <div id="load-example-btn">Load Example</div>
+            <div id="load-example-btn" @click="onLoadExample()">Load Example</div>
+            <div id="scenario-section">
+                <p id="scenario-section-heading">Scenario</p>
+                <p id="scenario-name">{{scenarioName}}</p>
+                <div id="frame-section">
+                    <div
+                            v-for="(graph, index) in graphs"
+                            :key="index"
+                            class="frame"
+                            @click="onFrameClick(index)"
+                    >
+                        {{graph.name}}
+                    </div>
+                </div>
+            </div>
         </div>
         <div id="graph"></div>
     </div>
@@ -15,10 +29,13 @@
 import * as d3 from 'd3';
 // eslint-disable-next-line
     import * as graphviz from 'd3-graphviz';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
+import example from './example';
 
 export default {
   setup() {
+    const graphs = ref([]);
+    const scenarioName = ref('');
     let gv;
 
     onMounted(() => {
@@ -26,15 +43,23 @@ export default {
         .graphviz();
       // eslint-disable-next-line no-console
       gv.onerror(() => console.error('Given graph is not in dot notation'));
-
-      gv.renderDot('digraph {a;b;c;d;e}');
     });
 
-    const onButtonClickNext = () => gv
-      .transition(d3.transition().duration(500))
-      .renderDot('digraph {a -> b}');
+    const onLoadExample = () => {
+      graphs.value = example.frames;
+      gv
+        .renderDot(graphs.value[0].graph);
+    };
 
-    return { onButtonClickNext };
+    const onFrameClick = (index) => {
+      gv
+        .transition(d3.transition().duration(500))
+        .renderDot(graphs.value[index].graph);
+    };
+
+    return {
+      graphs, onLoadExample, onFrameClick, scenarioName,
+    };
   },
 };
 </script>
@@ -59,7 +84,7 @@ export default {
         height: 100%;
         width: 100%;
         display: flex;
-        background-color: #E5E5E5;
+        /*background-color: #E5E5E5;*/
     }
 
     #leftBar {
@@ -87,10 +112,6 @@ export default {
         width: 100%;
     }
 
-    #graph svg polygon {
-        fill: #E5E5E5;
-    }
-
     #load-btn, #save-btn {
         height: 30px;
         width: fit-content;
@@ -98,6 +119,11 @@ export default {
         background-color: #E5E5E5;
         border-radius: 4px;
         cursor: pointer;
+        transition: .1s;
+    }
+
+    #load-btn:hover, #save-btn:hover {
+        background-color: #b8b8b8;
     }
 
     #load-example-btn {
@@ -108,5 +134,43 @@ export default {
         background-color: #E5E5E5;
         border-radius: 4px;
         cursor: pointer;
+        transition: .1s;
+    }
+
+    #load-example-btn:hover {
+        background-color: #b8b8b8;
+    }
+
+    #scenario-section {
+        margin-top: 50px;
+    }
+
+    #scenario-section-heading {
+        font-size: 20px;
+    }
+
+    #frame-section {
+        margin-top: 15px;
+        max-height: 500px;
+        width: 140px;
+        background-color: #374a5c;
+        overflow-y: auto;
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+
+    #frame-section::-webkit-scrollbar {
+        display: none;
+    }
+
+    .frame {
+        width: 100%;
+        background-color: #E5E5E5;
+        cursor: pointer;
+        transition: .1s;
+    }
+
+    .frame:hover {
+        background-color: #b8b8b8;
     }
 </style>
