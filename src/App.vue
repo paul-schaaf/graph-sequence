@@ -49,6 +49,7 @@ export default {
       graphs.value = example.frames;
       gv
         .renderDot(graphs.value[0].graph);
+      scenarioName.value = example.name;
     };
 
     const onFrameClick = (index) => {
