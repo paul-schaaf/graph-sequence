@@ -12,30 +12,31 @@
 </template>
 
 <script>
-    import * as d3 from 'd3';
-    // eslint-disable-next-line
+import * as d3 from 'd3';
+// eslint-disable-next-line
     import * as graphviz from 'd3-graphviz';
-    import {onMounted} from 'vue';
+import { onMounted } from 'vue';
 
-    export default {
-        setup() {
-            let gv;
+export default {
+  setup() {
+    let gv;
 
-            onMounted(() => {
-                gv = d3.select("#graph")
-                    .graphviz();
-                gv.onerror(() => console.error("Given graph is not in dot notation"));
+    onMounted(() => {
+      gv = d3.select('#graph')
+        .graphviz();
+      // eslint-disable-next-line no-console
+      gv.onerror(() => console.error('Given graph is not in dot notation'));
 
-                gv.renderDot('digraph {a;b;c;d;e}');
-            });
+      gv.renderDot('digraph {a;b;c;d;e}');
+    });
 
-            const onButtonClickNext = () => gv
-                .transition(d3.transition().duration(500))
-                .renderDot('digraph {a -> b}');
+    const onButtonClickNext = () => gv
+      .transition(d3.transition().duration(500))
+      .renderDot('digraph {a -> b}');
 
-            return {onButtonClickNext}
-        }
-    }
+    return { onButtonClickNext };
+  },
+};
 </script>
 
 <style>
