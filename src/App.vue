@@ -5,7 +5,7 @@
                 <div
                         id="load-text-btn"
                         class="load-btn"
-                        @click="onLoadFromText('load-from-text-modal')"
+                        @click="onLoadFromText()"
                 >
                     Load from text</div>
                 <div id="load-json-btn" class="load-btn">Load from json</div>
@@ -41,7 +41,13 @@
             <div
                     id="load-from-text-modal-content"
             >
-                Copy your entire sequence of graphs here without a delimiter!
+                Copy your entire sequence of graphs here without a delimiter! Example:
+                <p class="code">
+                    <code>digraph {a -> b} digraph {a -> b -> c} digraph {a; b -> c}
+                    </code>
+                </p>
+                <input v-model="plaintextScenario" type="text"/>
+                <input type="submit" class="submit-btn" @click="loadPlaintextScenario">
             </div>
         </div>
         <div class="modal">
@@ -68,6 +74,7 @@ export default {
     const graphs = ref([]);
     const scenarioName = ref('');
     const transitionsEnabled = ref(true);
+    const plaintextScenario = ref('');
 
     let gv;
     let modal;
@@ -82,15 +89,23 @@ export default {
       modal = new VanillaModal();
     });
 
-    const onLoadExample = () => {
-      graphs.value = example.frames;
+    const load = (scenario) => {
+      graphs.value = scenario.frames;
       // eslint-disable-next-line no-underscore-dangle
       gv._transition = undefined;
       gv.renderDot(graphs.value[0].graph);
       scenarioName.value = example.name;
     };
 
-    const onLoadFromText = (id) => modal.open(`#${id}`);
+    const onLoadExample = () => {
+      load(example);
+    };
+
+    const onLoadFromText = () => modal.open('#load-from-text-modal');
+
+    const loadPlaintextScenario = () => {
+      modal.close('#load-from-text-modal');
+    };
 
     const onFrameClick = (index) => {
       if (transitionsEnabled.value) {
@@ -107,16 +122,44 @@ export default {
     };
 
     return {
-      graphs, onLoadExample, onFrameClick, scenarioName, transitionsEnabled, onLoadFromText,
+      graphs,
+      onLoadExample,
+      onFrameClick,
+      scenarioName,
+      transitionsEnabled,
+      onLoadFromText,
+      plaintextScenario,
+      loadPlaintextScenario,
     };
   },
 };
 </script>
 
 <style>
+    .submit-btn {
+        cursor: pointer;
+        border: 0px;
+        background-color: #E5E5E5;
+        transition: .2s;
+    }
+
+    .submit-btn:hover {
+        background-color: #b8b8b8;
+    }
+
     #load-from-text-modal-content {
         width: 300px;
         padding: 30px;
+    }
+
+    #load-from-text-modal-content .code {
+        margin-top: 10px;
+    }
+
+    #load-from-text-modal-content input {
+        width: 100%;
+        height: 30px;
+        margin-top: 20px;
     }
 
     * {
@@ -127,6 +170,12 @@ export default {
 
     body, html {
         height: 100%;
+    }
+
+    .code {
+        padding: 5px;
+        background-color: #161f2a;
+        color: white;
     }
 
     #app {
