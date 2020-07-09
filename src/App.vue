@@ -94,7 +94,7 @@ export default {
       // eslint-disable-next-line no-underscore-dangle
       gv._transition = undefined;
       gv.renderDot(graphs.value[0].graph);
-      scenarioName.value = example.name;
+      scenarioName.value = scenario.name;
     };
 
     const onLoadExample = () => {
@@ -104,7 +104,26 @@ export default {
     const onLoadFromText = () => modal.open('#load-from-text-modal');
 
     const loadPlaintextScenario = () => {
+      if (plaintextScenario.value === '') {
+        return;
+      }
       modal.close('#load-from-text-modal');
+      let txt = plaintextScenario.value;
+      const frames = [];
+      let frameCounter = -1;
+      while (txt.indexOf('digraph') !== -1) {
+        frameCounter += 1;
+        txt = txt.trim();
+        const nextDigraph = txt.substring(1).indexOf('digraph');
+        if (nextDigraph === -1) {
+          frames.push({ name: `Frame ${frameCounter}`, graph: txt.trim() });
+          break;
+        }
+        frames.push({ name: `Frame ${frameCounter}`, graph: txt.substring(0, nextDigraph + 1).trim() });
+        txt = txt.substring(nextDigraph + 1);
+      }
+      plaintextScenario.value = '';
+      load({ name: 'unknown', frames });
     };
 
     const onFrameClick = (index) => {
