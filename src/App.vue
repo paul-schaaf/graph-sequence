@@ -6,6 +6,10 @@
                 <div id="save-btn">Save</div>
             </div>
             <div id="load-example-btn" @click="onLoadExample()">Load Example</div>
+            <label id="transitions-checkbox-label">
+                <input v-model="transitionsEnabled" type="checkbox" id="transitions-checkbox"/>
+                Transitions
+            </label>
             <div id="scenario-section">
                 <p id="scenario-section-heading">Scenario</p>
                 <p id="scenario-name">{{scenarioName}}</p>
@@ -29,37 +33,51 @@
 import * as d3 from 'd3';
 // eslint-disable-next-line
     import * as graphviz from 'd3-graphviz';
-import { onMounted, ref } from 'vue';
+import {
+  onMounted, ref,
+} from 'vue';
 import example from './example';
 
 export default {
   setup() {
     const graphs = ref([]);
     const scenarioName = ref('');
+    const transitionsEnabled = ref(true);
+
     let gv;
 
     onMounted(() => {
       gv = d3.select('#graph')
         .graphviz();
+
       // eslint-disable-next-line no-console
       gv.onerror(() => console.error('Given graph is not in dot notation'));
     });
 
     const onLoadExample = () => {
       graphs.value = example.frames;
-      gv
-        .renderDot(graphs.value[0].graph);
+      // eslint-disable-next-line no-underscore-dangle
+      gv._transition = undefined;
+      gv.renderDot(graphs.value[0].graph);
       scenarioName.value = example.name;
     };
 
     const onFrameClick = (index) => {
+      if (transitionsEnabled.value) {
+        gv = d3.select('#graph')
+          .graphviz().transition(d3.transition().duration(500));
+        // eslint-disable-next-line no-console
+        gv.onerror(() => console.error('Given graph is not in dot notation'));
+      } else {
+        // eslint-disable-next-line no-underscore-dangle
+        gv._transition = undefined;
+      }
       gv
-        .transition(d3.transition().duration(500))
         .renderDot(graphs.value[index].graph);
     };
 
     return {
-      graphs, onLoadExample, onFrameClick, scenarioName,
+      graphs, onLoadExample, onFrameClick, scenarioName, transitionsEnabled,
     };
   },
 };
@@ -140,6 +158,16 @@ export default {
 
     #load-example-btn:hover {
         background-color: #b8b8b8;
+    }
+
+    #transitions-checkbox-label {
+        margin-top: 20px;
+        cursor: pointer;
+    }
+
+    #transitions-checkbox {
+        cursor: pointer;
+        transform: translateY(1px);
     }
 
     #scenario-section {
