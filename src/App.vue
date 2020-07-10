@@ -8,7 +8,13 @@
                         @click="onLoadFromText()"
                 >
                     Load from text</div>
-                <div id="load-json-btn" class="load-btn">Load from json</div>
+                <div
+                        id="load-json-btn"
+                        class="load-btn"
+                        @click="onLoadFromJson()"
+                >
+                    Load from json
+                </div>
                 <div
                         id="load-example-btn"
                         class="load-btn"
@@ -50,6 +56,35 @@
                 <input type="submit" class="submit-btn" @click="loadPlaintextScenario">
             </div>
         </div>
+        <div id="load-from-json-modal" class="modal-hider">
+            <div
+                    id="load-from-json-modal-content"
+            >
+                Copy your json here in the following format:
+                <p>
+                    <pre>
+                    <code ref="jsonRef">
+{
+    "name":"scenarioName",
+    "frames":
+        [
+            {
+                "name":"something happens",
+                "graph":"digraph {a -> b}"
+            },
+            {
+                "name":"another thing happens",
+                "graph":"digraph {a -> b -> c}"
+            }
+        ]
+}
+                    </code>
+                    </pre>
+                </p>
+                <input v-model="jsonScenario" type="text"/>
+                <input type="submit" class="submit-btn" @click="loadJsonScenario()">
+            </div>
+        </div>
         <div class="modal">
             <div class="modal-inner">
                 <span data-modal-close>&times;</span>
@@ -60,7 +95,10 @@
 </template>
 
 <script>
+import 'highlight.js/styles/atelier-lakeside-dark.css';
 import { saveAs } from 'file-saver';
+import hljs from 'highlight.js/lib/core';
+import json from 'highlight.js/lib/languages/json';
 
 import VanillaModal from 'vanilla-modal';
 import * as d3 from 'd3';
@@ -72,12 +110,16 @@ import {
 import example from './example';
 import { createFramesFromPlaintext } from './frameCreation';
 
+hljs.registerLanguage('json', json);
+
 export default {
   setup() {
     const graphs = ref([]);
     const scenarioName = ref('');
     const transitionsEnabled = ref(true);
     const plaintextScenario = ref('');
+    const jsonScenario = ref('');
+    const jsonRef = ref(null);
 
     let gv;
     let modal;
@@ -90,6 +132,8 @@ export default {
       gv.onerror(() => console.error('Given graph is not in dot notation'));
 
       modal = new VanillaModal();
+
+      hljs.highlightBlock(jsonRef.value);
     });
 
     const load = (scenario) => {
@@ -105,6 +149,7 @@ export default {
     };
 
     const onLoadFromText = () => modal.open('#load-from-text-modal');
+    const onLoadFromJson = () => modal.open('#load-from-json-modal');
 
     const loadPlaintextScenario = () => {
       if (plaintextScenario.value === '') {
@@ -114,6 +159,24 @@ export default {
       const frames = createFramesFromPlaintext(plaintextScenario.value);
       plaintextScenario.value = '';
       load({ name: 'unknown', frames });
+    };
+
+    const loadJsonScenario = () => {
+      if (jsonScenario.value === '') {
+        return;
+      }
+      let scenario;
+      try {
+        scenario = JSON.parse(jsonScenario.value);
+      } catch (e) {
+        // eslint-disable-next-line no-alert
+        alert('Invalid JSON');
+        return;
+      }
+      modal.close('#load-from-json-modal');
+
+      load(scenario);
+      jsonScenario.value = '';
     };
 
     const save = () => {
@@ -150,9 +213,13 @@ export default {
       scenarioName,
       transitionsEnabled,
       onLoadFromText,
+      onLoadFromJson,
       plaintextScenario,
       loadPlaintextScenario,
       save,
+      jsonRef,
+      jsonScenario,
+      loadJsonScenario,
     };
   },
 };
@@ -161,7 +228,7 @@ export default {
 <style>
     .submit-btn {
         cursor: pointer;
-        border: 0px;
+        border: 0;
         background-color: #E5E5E5;
         transition: .2s;
     }
@@ -180,6 +247,26 @@ export default {
     }
 
     #load-from-text-modal-content input {
+        width: 100%;
+        height: 30px;
+        margin-top: 20px;
+    }
+
+    #load-from-json-modal-content {
+        width: 500px;
+        padding: 30px;
+    }
+
+    #load-from-json-modal-content pre {
+        height: 290px;
+    }
+
+    #load-from-json-modal-content input {
+        width: 100%;
+        height: 30px;
+    }
+
+    #load-from-json-modal-content input[type=submit] {
         width: 100%;
         height: 30px;
         margin-top: 20px;
