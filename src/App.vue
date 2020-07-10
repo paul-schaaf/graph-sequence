@@ -15,7 +15,7 @@
                         @click="onLoadExample()">
                     Load Example
                 </div>
-                <div id="save-btn">Save as json</div>
+                <div id="save-btn" @click="save()">Save as json</div>
             </div>
             <label id="transitions-checkbox-label">
                 <input v-model="transitionsEnabled" type="checkbox" id="transitions-checkbox"/>
@@ -60,6 +60,8 @@
 </template>
 
 <script>
+import { saveAs } from 'file-saver';
+
 import VanillaModal from 'vanilla-modal';
 import * as d3 from 'd3';
 // eslint-disable-next-line
@@ -114,6 +116,19 @@ export default {
       load({ name: 'unknown', frames });
     };
 
+    const save = () => {
+      if (scenarioName.value === '') {
+        // eslint-disable-next-line no-alert
+        alert('Please load a scenario to save it');
+        return;
+      }
+      const file = new File(
+        [JSON.stringify({ name: scenarioName.value, frames: graphs.value })],
+        `${scenarioName.value}.json`,
+      );
+      saveAs(file);
+    };
+
     const onFrameClick = (index) => {
       if (transitionsEnabled.value) {
         gv = d3.select('#graph')
@@ -137,6 +152,7 @@ export default {
       onLoadFromText,
       plaintextScenario,
       loadPlaintextScenario,
+      save,
     };
   },
 };
