@@ -41,6 +41,7 @@
                     </div>
                 </div>
             </div>
+            <p id="source-link">🐧 <a href="https://github.com/paul-schaaf/graph-sequence" target="_blank" rel="noreferrer noopener">source</a> 🐧</p>
         </div>
         <div id="graph"></div>
         <div id="load-from-text-modal" class="modal-hider">
@@ -103,7 +104,7 @@ import json from 'highlight.js/lib/languages/json';
 import VanillaModal from 'vanilla-modal';
 import * as d3 from 'd3';
 // eslint-disable-next-line
-    import * as graphviz from 'd3-graphviz';
+import * as graphviz from 'd3-graphviz';
 import {
   onMounted, ref,
 } from 'vue';
@@ -226,6 +227,16 @@ export default {
 </script>
 
 <style>
+    #source-link {
+        position: absolute;
+        bottom: 15px;
+    }
+
+    #source-link a {
+        text-decoration: none;
+        color: #2c3e50;
+    }
+
     .submit-btn {
         cursor: pointer;
         border: 0;
