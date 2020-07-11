@@ -268,6 +268,13 @@ export default {
         padding: 30px;
     }
 
+    @media (max-width: 600px) {
+        #load-from-json-modal-content {
+            width: 300px;
+            padding: 30px;
+        }
+    }
+
     #load-from-json-modal-content pre {
         height: 290px;
     }
